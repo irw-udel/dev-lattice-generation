@@ -1,3 +1,74 @@
+Configuration of components
+
+# Primitive
+
+## Prepare
+
+Icon: `thought-balloon-twitter-1f4ad-24-stroke.png`
+
+### Inputs
+
+- primitive
+    - Item access
+    - Geometry base
+
+# Populate
+
+## Lattice
+
+Icon: `globe-with-meridians-twitter-1f310-24-stroke-scaled.png`
+
+### Inputs
+
+- core_voxels
+    - List access
+    - No type hint
+- boundary_voxels
+    - List access
+    - No type hint
+- unit_cell
+    - List access
+    - Curve
+- connectivity
+    - Item access
+    - No type hint
+- primitive
+    - Item access
+    - No type hint
+
+# Mesh
+
+## Meshing
+
+Icon: `checkered-flag-twitter-1f3c1-24-stroke.png`
+
+### Inputs
+
+- curves
+    - List access
+    - Curve
+- radius
+    - Item access
+    - int
+- dendroSettings
+    - Item access
+    - No type hint
+- surfaces
+    - List access
+    - Surface
+- bake
+    - Item access
+    - bool
+- save
+    - Item access
+    - bool
+- file_name
+    - Item access
+    - str
+- delete
+    - Item access
+    - bool
+
 # Logging
 
 ## System Info
