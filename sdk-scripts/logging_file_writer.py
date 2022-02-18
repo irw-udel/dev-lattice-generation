@@ -1,6 +1,6 @@
 """Writes text input to a file.
     Inputs:
-        file_path: Path to the file to write. Relative to the GH definition directory
+        file_path: Path to the file to write
         content: Content to write to the file
         write_file: Write the file?"""
 
@@ -25,8 +25,8 @@ class Logger(component):
         ghdoc = scriptcontext.doc
 
         if write_file and file_path:
-            working_dir = os.path.dirname(os.path.realpath(ghdoc.Path))
-            file_path = os.path.join(working_dir, file_path)
+            # working_dir = os.path.dirname(os.path.realpath(ghdoc.Path))
+            # file_path = os.path.join(working_dir, file_path)
 
             if (os.path.exists(file_path)):
                 file = open(file_path, "a")

@@ -1,11 +1,14 @@
 """Provides a scripting component.
     Inputs:
         refresh: Recalculate the component
-        base_dir: The project's main directory
+        project_dir: The project's main directory
+        save_directory: Folder to save the STL and log output
         id_properties: Key features of the part. Takes single value or list of properties
     Output:
         part_id: A unique ID for the generated part. Takes the format (date)-(properties fragment)-(instance fragment)
         date_utc: The UTC date and time at which computation was performed
+        mesh_path: Full path for the STL output
+        log_path: Full path for the log output
         gh_file: Path and name of the Grasshopper definition
         base_unit: Base unit of the Rhino and Grasshopper file (e.g. millimeter)
         device: Device used for computation
@@ -87,7 +90,7 @@ def get_software_build():
     return rhino_build, rhino_date, gh_build, gh_date
 
 class SystemInfo(component):
-    def RunScript(self, refresh, base_dir, id_properties):
+    def RunScript(self, refresh, project_dir, save_directory, id_properties):
         ghdoc = scriptcontext.doc
         part_id = None
         date_utc = None
@@ -105,8 +108,15 @@ class SystemInfo(component):
         part_id, date_utc = make_id(id_properties)
         gh_path = os.path.realpath(ghdoc.Path)
 
-        if base_dir:
-            gh_file = gh_path.split(base_dir)[1]
+        if not save_directory:
+            save_directory = os.path.dirname(ghdoc.Path)
+
+        file_name_base = "\\".join([save_directory, part_id])
+        mesh_path = "\"{}.stl\"".format(file_name_base)
+        log_path = "{}.txt".format(file_name_base)
+
+        if project_dir:
+            gh_file = gh_path.split(project_dir)[1]
         else:
             gh_file = gh_path
 
@@ -125,4 +135,4 @@ class SystemInfo(component):
         for id, lib in addon_libraries.iteritems():
             addon_dependencies.append("{0} {1}".format(lib.Name, lib.Version))
         
-        return part_id, date_utc, gh_file, base_unit, device, rhino_build, rhino_date, gh_build, gh_date, core_dependencies, addon_dependencies
+        return part_id, date_utc, mesh_path, log_path, gh_file, base_unit, device, rhino_build, rhino_date, gh_build, gh_date, core_dependencies, addon_dependencies

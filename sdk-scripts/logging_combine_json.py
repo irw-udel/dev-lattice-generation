@@ -17,7 +17,8 @@ from collections import OrderedDict
 def combine_inputs(input_json):
     m = OrderedDict()
     for item in input_json:
-        m.update(json.loads(str(item), object_pairs_hook=OrderedDict))
+        if item:
+            m.update(json.loads(str(item), object_pairs_hook=OrderedDict))
     return m
 
 class CombineJson(component):

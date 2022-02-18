@@ -1,11 +1,13 @@
 """Convert a lattice frame to a printable mesh. Includes options to save with modifications for 3D printing.
     Inputs:
+        run: Run the script?
         curves: The lattice curves for meshing
         radius: Radius of the lattice curves
         dendroSettings: Settings provided by the Dendro component
         cut_surfaces: Cutting surfaces for trimming the lattice
         bake: Bake the part into Rhino?
         save: Save the part?
+        file_name: Where to save the part
         delete: Delete the part after saving?
     Output:
         out_mesh: Dendro-generated mesh of lattice
@@ -68,77 +70,78 @@ def get_cut_planes(surfaces, translation_factor = 0):
     return planes
 
 class MeshLattice(component):
-    def RunScript(self, curves, radius, dendroSettings, cut_surfaces, bake, save, file_name, delete):
+    def RunScript(self, run, curves, radius, dendroSettings, cut_surfaces, bake, save, file_name, delete):
         global out_mesh
         original_report = None
         cut_report = None
         volume = None
         area = None
         
-        #   Generate lattice volume and mesh
-        out_mesh = ghcomp.DendroGH.CurveToVolume(curves = curves, curve_radius = radius, settings = dendroSettings)
-        out_mesh = ghcomp.DendroGH.VolumetoMesh(volume = out_mesh, volume_settings = dendroSettings)
+        if run:
+            #   Generate lattice volume and mesh
+            out_mesh = ghcomp.DendroGH.CurveToVolume(curves = curves, curve_radius = radius, settings = dendroSettings)
+            out_mesh = ghcomp.DendroGH.VolumetoMesh(volume = out_mesh, volume_settings = dendroSettings)
 
-        original_bounds = out_mesh.GetBoundingBox(True)
-        original_report = get_mesh_report(report_instance = "original_report")
+            original_bounds = out_mesh.GetBoundingBox(True)
+            original_report = get_mesh_report(report_instance = "original_report")
 
-        #   Make checks and first repairs
-        degenerate_faces = to_json("degenerate_faces", out_mesh.Faces.RemoveZeroAreaFaces(0))
-        quads_to_tris = to_json("quads_to_tris", out_mesh.Faces.ConvertQuadsToTriangles())
-        out_mesh.UnifyNormals()
-        mesh_flipped = False
-        if(out_mesh.Volume() < 0):
-            out_mesh.Flip(True, True, True)
-            mesh_flipped = True
-        mesh_flipped = to_json("mesh_flipped", mesh_flipped)
-        mod_report = get_mesh_report(report_instance = "modified_report", additional_params=[degenerate_faces, quads_to_tris, mesh_flipped])
+            #   Make checks and first repairs
+            degenerate_faces = to_json("degenerate_faces", out_mesh.Faces.RemoveZeroAreaFaces(0))
+            quads_to_tris = to_json("quads_to_tris", out_mesh.Faces.ConvertQuadsToTriangles())
+            out_mesh.UnifyNormals()
+            mesh_flipped = False
+            if(out_mesh.Volume() < 0):
+                out_mesh.Flip(True, True, True)
+                mesh_flipped = True
+            mesh_flipped = to_json("mesh_flipped", mesh_flipped)
+            mod_report = get_mesh_report(report_instance = "modified_report", additional_params=[degenerate_faces, quads_to_tris, mesh_flipped])
 
-        #    Split mesh
-        if cut_surfaces:
-            revised_cut = False
-            planes = get_cut_planes(cut_surfaces)
-            cut_mesh = Rhino.Geometry.Mesh.CreateBooleanDifference({out_mesh}, planes)[0]
-            cut_bounds = cut_mesh.GetBoundingBox(True)
+            #    Split mesh
+            if cut_surfaces:
+                revised_cut = False
+                planes = get_cut_planes(cut_surfaces)
+                cut_mesh = Rhino.Geometry.Mesh.CreateBooleanDifference({out_mesh}, planes)[0]
+                cut_bounds = cut_mesh.GetBoundingBox(True)
 
-            if (cut_bounds.Volume/original_bounds.Volume < 0.01):
-                revised_cut = True
-                planes = get_cut_planes(cut_surfaces, translation_factor = 0.01)
-                out_mesh = Rhino.Geometry.Mesh.CreateBooleanDifference({out_mesh}, planes)[0]
-            else:
-                out_mesh = cut_mesh
+                if (cut_bounds.Volume/original_bounds.Volume < 0.01):
+                    revised_cut = True
+                    planes = get_cut_planes(cut_surfaces, translation_factor = 0.01)
+                    out_mesh = Rhino.Geometry.Mesh.CreateBooleanDifference({out_mesh}, planes)[0]
+                else:
+                    out_mesh = cut_mesh
 
-            # out_mesh.Weld(3.1415)
-            revised_cut = to_json("revised_cut", revised_cut)
-            face_count_cut = to_json("face_count_cut", out_mesh.Faces.Count)
-            fill_success = to_json("fill_success", out_mesh.FillHoles())
-            face_count_filled = to_json("face_count_filled", out_mesh.Faces.Count)
-            cut_report = get_mesh_report(report_instance = "cut_report", additional_params=[revised_cut, face_count_cut, fill_success, face_count_filled])
+                # out_mesh.Weld(3.1415)
+                revised_cut = to_json("revised_cut", revised_cut)
+                face_count_cut = to_json("face_count_cut", out_mesh.Faces.Count)
+                fill_success = to_json("fill_success", out_mesh.FillHoles())
+                face_count_filled = to_json("face_count_filled", out_mesh.Faces.Count)
+                cut_report = get_mesh_report(report_instance = "cut_report", additional_params=[revised_cut, face_count_cut, fill_success, face_count_filled])
 
-        #   Keep until main script is validated
-        #    if (a.GetNakedEdges()):
-        #        print a.GetNakedEdges()
-        #        print a.Vertices.Align(distance = 1e-1, whichVertices = a.GetNakedEdgePointStatus())
-        #        a.ExtractNonManifoldEdges(False)
-        #        a.Faces.ExtractDuplicateFaces()
-        #        print a.Vertices.Align(distance = 1e-1, whichVertices = a.GetNakedEdgePointStatus()) 
+            #   Keep until main script is validated
+            #    if (a.GetNakedEdges()):
+            #        print a.GetNakedEdges()
+            #        print a.Vertices.Align(distance = 1e-1, whichVertices = a.GetNakedEdgePointStatus())
+            #        a.ExtractNonManifoldEdges(False)
+            #        a.Faces.ExtractDuplicateFaces()
+            #        print a.Vertices.Align(distance = 1e-1, whichVertices = a.GetNakedEdgePointStatus()) 
 
-        #   Calculate mesh properties
-        volume = out_mesh.Volume()
-        areaMassProperties = Rhino.Geometry.AreaMassProperties.Compute(out_mesh)
-        area = areaMassProperties.Area
+            #   Calculate mesh properties
+            volume = out_mesh.Volume()
+            areaMassProperties = Rhino.Geometry.AreaMassProperties.Compute(out_mesh)
+            area = areaMassProperties.Area
 
-        #   Export
-        if bake or save:
-            id = Rhino.RhinoDoc.ActiveDoc.Objects.Add(out_mesh)
-            id = str(id)
+            #   Export
+            if bake or save:
+                id = Rhino.RhinoDoc.ActiveDoc.Objects.Add(out_mesh)
+                id = str(id)
 
-            if save:
-                rs.Command("SelID " + id)
-                rs.Command("-Export " + file_name + ".stl Enter")
-            
-                if delete:
+                if save:
                     rs.Command("SelID " + id)
-                    rs.Command("Delete")
-            
-        rs.Command("ClearUndo")
-        return out_mesh, original_report, mod_report, cut_report, volume, area
+                    rs.Command("-Export " + file_name + " Enter")
+                
+                    if delete:
+                        rs.Command("SelID " + id)
+                        rs.Command("Delete")
+                
+            rs.Command("ClearUndo")
+            return out_mesh, original_report, mod_report, cut_report, volume, area
