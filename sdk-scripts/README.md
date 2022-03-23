@@ -95,6 +95,47 @@ Icon: `checkered-flag-twitter-1f3c1-24-stroke.png`
 - Subcategory: Mesh
 - GUID: 0b2c3cca-1e24-4db7-9986-56faf7bd3b0e
 
+## Meshing - Points
+
+Icon: `checkered-flag-twitter-1f3c1-24-stroke.png`
+
+### Inputs
+
+- run
+    - Item access
+    - bool
+- points
+    - List access
+    - Point3d
+- radius
+    - List access
+    - No type hint
+- dendroSettings
+    - Item access
+    - No type hint
+- surfaces
+    - List access
+    - Surface
+- bake
+    - Item access
+    - bool
+- save
+    - Item access
+    - bool
+- file_name
+    - Item access
+    - str
+- delete
+    - Item access
+    - bool
+
+### Compiling
+
+- Nickname: ltmeshpt
+- Category: LatticeTools-Internal
+- Subcategory: Mesh
+- GUID: 9ece7e1e-dca2-4b50-b599-ebf0536ce0db
+
 # Logging
 
 ## System Info

@@ -2,4 +2,5 @@ This repository is for developing compiled lattice generation tools. These files
 
 ## Todo
 - In [`mesh_meshing.py`](sdk-scripts/mesh_meshing.py), ~~save if a file name exists, and remove save option~~. Delete if bake is not `True`
-- Account for short curves in meshing (or change to points)
+- ~~Account for short curves in meshing (or change to points)~~ (20220306 - Added component for points)
+- Revise points meshing input parameter name
