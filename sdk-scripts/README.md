@@ -1,5 +1,7 @@
 Configuration of components
 
+Note: after v0.1.0-alpha, no longer tracking for individual components. The following will remain as a template.
+
 # Primitive
 
 ## Prepare

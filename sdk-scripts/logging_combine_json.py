@@ -18,7 +18,8 @@ def combine_inputs(input_json):
     m = OrderedDict()
     for item in input_json:
         if item:
-            m.update(json.loads(str(item), object_pairs_hook=OrderedDict))
+            item = str(item).replace("\n", "")
+            m.update(json.loads(item, object_pairs_hook=OrderedDict))
     return m
 
 class CombineJson(component):

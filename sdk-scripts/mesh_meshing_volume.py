@@ -1,7 +1,7 @@
-"""Convert lattice points to a printable mesh. Includes options to save with modifications for 3D printing.
+"""Dendro Volume To Mesh with repairs and reports
     Inputs:
         run: Run the script?
-        points: The lattice points for meshing
+        dendroVolume: The volume for meshing
         radius: Radius of the lattice curves
         dendroSettings: Settings provided by the Dendro component
         cut_surfaces: Cutting meshes for trimming the lattice
@@ -18,7 +18,7 @@
         area: Surface area of the final lattice in document units"""
 
 __author__ = "irw"
-__version__ = "20220306"
+__version__ = "20220323"
 
 from ghpythonlib.componentbase import executingcomponent as component
 import Grasshopper, GhPython
@@ -72,7 +72,7 @@ def get_cut_planes(surfaces, translation_factor = 0):
         return planes
 
 class MeshLattice(component):
-    def RunScript(self, run, points, radius, dendroSettings, cut_surfaces, bake, save, file_name, delete):
+    def RunScript(self, run, dendroVolume, radius, dendroSettings, cut_surfaces, bake, save, file_name, delete):
         global out_mesh
         original_report = None
         cut_report = None
@@ -81,8 +81,7 @@ class MeshLattice(component):
         
         if run:
             #   Generate lattice volume and mesh
-            out_mesh = ghcomp.DendroGH.PointsToVolume(points = points, point_radius = radius, settings = dendroSettings)
-            out_mesh = ghcomp.DendroGH.VolumetoMesh(volume = out_mesh, volume_settings = dendroSettings)
+            out_mesh = ghcomp.DendroGH.VolumetoMesh(volume = dendroVolume, volume_settings = dendroSettings)
 
             original_bounds = out_mesh.GetBoundingBox(True)
             original_report = get_mesh_report(report_instance = "original_report")
@@ -137,7 +136,7 @@ class MeshLattice(component):
                 id = Rhino.RhinoDoc.ActiveDoc.Objects.Add(out_mesh)
                 id = str(id)
 
-                if save:
+                if save and file_name:
                     rs.Command("SelID " + id)
                     rs.Command("-Export " + file_name + " Enter")
                 

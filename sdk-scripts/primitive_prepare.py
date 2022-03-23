@@ -58,7 +58,7 @@ def get_cut_planes(primitive):
     bottom_plane = Rhino.Geometry.Plane(bottom_point, z_vector)
     bottom_surface = Rhino.Geometry.PlaneSurface(bottom_plane, x_interval, y_interval)
 
-    return top_surface, bottom_surface
+    return [Rhino.Geometry.Mesh.CreateFromSurface(surface, Rhino.Geometry.MeshingParameters(1)) for surface in [top_surface, bottom_surface]]
 
 def get_symmetry_planes(primitive):
     bbox = primitive.GetBoundingBox(True)
@@ -86,21 +86,13 @@ def get_symmetry_planes(primitive):
     YZ_cut = Rhino.Geometry.PlaneSurface(Rhino.Geometry.Plane(plane_point, Rhino.Geometry.Vector3d(-1,0,0)), yz_y_interval, yz_z_interval)
     ZX_cut = Rhino.Geometry.PlaneSurface(Rhino.Geometry.Plane(plane_point, Rhino.Geometry.Vector3d(0,-1,0)), zx_z_interval, zx_x_interval)
 
-    return XY_cut, YZ_cut, ZX_cut
-
-def split_mesh(primitive, surfaces):
-    planes = set()
-    for surface in surfaces:
-        planes.add(Rhino.Geometry.Mesh.CreateFromSurface(surface, Rhino.Geometry.MeshingParameters(1)))
-    octant = Rhino.Geometry.Mesh.CreateBooleanDifference({primitive}, planes)
-
-    return octant
+    return [Rhino.Geometry.Mesh.CreateFromSurface(surface, Rhino.Geometry.MeshingParameters(1)) for surface in [XY_cut, YZ_cut, ZX_cut]]
 
 class Primitive(component):
     def RunScript(self, primitive):
         primitive = clean_primitive(primitive)
         cut_surfaces = get_cut_planes(primitive)
         symmetry_surfaces = get_symmetry_planes(primitive)
-        octant = split_mesh(primitive, symmetry_surfaces)
+        octant = Rhino.Geometry.Mesh.CreateBooleanDifference({primitive}, symmetry_surfaces)
         
         return primitive, cut_surfaces, symmetry_surfaces, octant
