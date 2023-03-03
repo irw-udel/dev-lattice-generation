@@ -5,7 +5,8 @@
         primitive: The primitive as a closed mesh
         cut_surfaces: Top and bottom surfaces, oriented for trimming the lattice
         symmetry_surfaces: Surfaces for octant-based symmetry
-        octant: Primitive mesh octant (-1, -1, -1)"""
+        octant: Primitive mesh octant (-1, -1, -1)
+        quarter: Primitive mesh quarter (-1, -1)"""
 
 __author__ = "irw"
 __version__ = "20220124"
@@ -94,5 +95,6 @@ class Primitive(component):
         cut_surfaces = get_cut_planes(primitive)
         symmetry_surfaces = get_symmetry_planes(primitive)
         octant = Rhino.Geometry.Mesh.CreateBooleanDifference({primitive}, symmetry_surfaces)
+        quarter = Rhino.Geometry.Mesh.CreateBooleanDifference({primitive}, symmetry_surfaces[1:3])
         
-        return primitive, cut_surfaces, symmetry_surfaces, octant
+        return primitive, cut_surfaces, symmetry_surfaces, octant, quarter

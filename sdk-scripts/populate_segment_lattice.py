@@ -21,8 +21,11 @@ def segment_curves_parallel(curve):
     params = curve.DivideByLength(segment_length, False)
     points = []
     points.append(curve.PointAtStart)
-    for t in params:
-        points.append(curve.PointAt(t))
+    try:
+        for t in params:
+            points.append(curve.PointAt(t))
+    except:
+        pass
     points.append(curve.PointAtEnd)
     return points
 
